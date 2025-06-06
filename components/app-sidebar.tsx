@@ -16,6 +16,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
+import Image from "next/image";
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 export function AppSidebar({ user }: { user: User | undefined }) {
@@ -34,9 +35,13 @@ export function AppSidebar({ user }: { user: User | undefined }) {
               }}
               className="flex flex-row gap-3 items-center"
             >
-              <span className="text-lg font-semibold px-2 hover:bg-muted rounded-md cursor-pointer">
-                Chatbot
-              </span>
+              <Image
+                src="/images/logo.svg"
+                alt="Image"
+                width={597}
+                height={155}
+                className="h-6 w-auto hover:bg-muted rounded-md px-2"
+              />
             </Link>
             <Tooltip>
               <TooltipTrigger asChild>
