@@ -1,6 +1,4 @@
 'use client';
-
-import type { Message } from 'ai';
 import cx from 'classnames';
 import {
   AnimatePresence,
@@ -11,7 +9,8 @@ import {
 import {
   type Dispatch,
   memo,
-  ReactNode,
+  type ReactNode,
+  type RefObject,
   type SetStateAction,
   useEffect,
   useRef,
@@ -27,9 +26,9 @@ import {
 } from '@/components/ui/tooltip';
 
 import { ArrowUpIcon, StopIcon, SummarizeIcon } from './icons';
-import { artifactDefinitions, ArtifactKind } from './artifact';
-import { ArtifactToolbarItem } from './create-artifact';
-import { UseChatHelpers } from '@ai-sdk/react';
+import { artifactDefinitions, type ArtifactKind } from './artifact';
+import type { ArtifactToolbarItem } from './create-artifact';
+import type { UseChatHelpers } from '@ai-sdk/react';
 
 type ToolProps = {
   description: string;
@@ -131,7 +130,7 @@ const Tool = ({
   );
 };
 
-const randomArr = [...Array(6)].map((x) => nanoid(5));
+const randomArr = [...Array(6)].map(() => nanoid(5));
 
 const ReadingLevelSelector = ({
   setSelectedTool,
@@ -313,8 +312,8 @@ const PureToolbar = ({
   setMessages: UseChatHelpers['setMessages'];
   artifactKind: ArtifactKind;
 }) => {
-  const toolbarRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const toolbarRef = useRef<HTMLElement>(null as unknown as HTMLElement);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -412,7 +411,7 @@ const PureToolbar = ({
         onAnimationComplete={() => {
           setIsAnimating(false);
         }}
-        ref={toolbarRef}
+        ref={toolbarRef as RefObject<HTMLDivElement | null>}
       >
         {status === 'streaming' ? (
           <motion.div

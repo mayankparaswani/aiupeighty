@@ -15,6 +15,7 @@ interface SuggestedActionsProps {
 function PureSuggestedActions({
   chatId,
   append,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   selectedVisibilityType,
 }: SuggestedActionsProps) {
   const suggestedActions = [

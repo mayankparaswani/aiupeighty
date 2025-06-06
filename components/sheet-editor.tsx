@@ -19,12 +19,7 @@ type SheetEditorProps = {
 const MIN_ROWS = 50;
 const MIN_COLS = 26;
 
-const PureSpreadsheetEditor = ({
-  content,
-  saveContent,
-  status,
-  isCurrentVersion,
-}: SheetEditorProps) => {
+const PureSpreadsheetEditor = ({ content, saveContent }: SheetEditorProps) => {
   const { resolvedTheme } = useTheme();
 
   const parseData = useMemo(() => {
@@ -73,9 +68,15 @@ const PureSpreadsheetEditor = ({
     return [rowNumberColumn, ...dataColumns];
   }, []);
 
+  type RowData = {
+    id: number;
+    rowNumber: number;
+    [key: string]: string | number;
+  };
+
   const initialRows = useMemo(() => {
     return parseData.map((row, rowIndex) => {
-      const rowData: any = {
+      const rowData: RowData = {
         id: rowIndex,
         rowNumber: rowIndex + 1,
       };
@@ -94,11 +95,11 @@ const PureSpreadsheetEditor = ({
     setLocalRows(initialRows);
   }, [initialRows]);
 
-  const generateCsv = (data: any[][]) => {
+  const generateCsv = (data: unknown[][]) => {
     return unparse(data);
   };
 
-  const handleRowsChange = (newRows: any[]) => {
+  const handleRowsChange = (newRows: RowData[]) => {
     setLocalRows(newRows);
 
     const updatedData = newRows.map((row) => {

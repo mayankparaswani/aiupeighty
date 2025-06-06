@@ -47,8 +47,8 @@ function getStreamContext() {
       globalStreamContext = createResumableStreamContext({
         waitUntil: after,
       });
-    } catch (error: any) {
-      if (error.message.includes('REDIS_URL')) {
+    } catch (error) {
+      if ((error as Error).message.includes('REDIS_URL')) {
         console.log(
           ' > Resumable streams are disabled due to missing REDIS_URL',
         );
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
   try {
     const json = await request.json();
     requestBody = postRequestBodySchema.parse(json);
-  } catch (_) {
+  } catch {
     return new ChatSDKError('bad_request:api').toResponse();
   }
 
@@ -202,7 +202,7 @@ export async function POST(request: Request) {
                     },
                   ],
                 });
-              } catch (_) {
+              } catch {
                 console.error('Failed to save chat');
               }
             }

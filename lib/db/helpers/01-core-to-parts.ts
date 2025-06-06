@@ -29,9 +29,9 @@ const INSERT_BATCH_SIZE = 1000; // Insert 1000 messages at a time
 type NewMessageInsert = {
   id: string;
   chatId: string;
-  parts: any[];
+  parts: unknown[];
   role: string;
-  attachments: any[];
+  attachments: unknown[];
   createdAt: Date;
 };
 
@@ -72,7 +72,7 @@ function getMessageRank(message: MessageDeprecated): number {
   return 3;
 }
 
-function dedupeParts<T extends { type: string; [k: string]: any }>(
+function dedupeParts<T extends { type: string; [k: string]: unknown }>(
   parts: T[],
 ): T[] {
   const seen = new Set<string>();
@@ -84,7 +84,7 @@ function dedupeParts<T extends { type: string; [k: string]: any }>(
   });
 }
 
-function sanitizeParts<T extends { type: string; [k: string]: any }>(
+function sanitizeParts<T extends { type: string; [k: string]: unknown }>(
   parts: T[],
 ): T[] {
   return parts.filter(
