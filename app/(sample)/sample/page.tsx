@@ -21,11 +21,14 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
 
 import { experimental_useObject as useObject } from '@ai-sdk/react';
-import { jobSchema } from '../api/sample/schema';
+import { type JobSchema, jobSchema } from '../api/sample/schema';
+import { Combobox } from '@/components/comboBox';
+import { useEffect, useMemo } from 'react';
+import { CopyButton } from '@/components/copy-button';
+import { Card } from '@/components/ui/card';
+import Link from 'next/link';
 
 export default function Page() {
   const { object, submit, isLoading } = useObject({
@@ -72,33 +75,134 @@ export default function Page() {
       {isLoading && (
         <div className="mt-4 text-gray-500">Generating job data...</div>
       )}
-      {object?.jobData && (
+      {object && (
         <div className="mt-4">
           <h2 className="text-lg font-semibold">Job Data</h2>
-          <h4>Alternate Titles</h4>
-          <Card className={`flex flex-row flex-wrap gap-2 p-2`}>
-            {object?.jobData?.titles?.map((title) => (
-              <Badge key={`${title}`}>{title}</Badge>
-            ))}
-          </Card>
-          <h4 className="mt-4">Must Haves</h4>
-          <Card className={`flex flex-row flex-wrap gap-2 p-2`}>
-            {object?.jobData?.mustHaves?.map((item) => (
-              <Badge key={`${item}`}>{item}</Badge>
-            ))}
-          </Card>
-          <h4 className="mt-4">Should Haves</h4>
-          <Card className={`flex flex-row flex-wrap gap-2 p-2`}>
-            {object?.jobData?.shouldHaves?.map((item) => (
-              <Badge key={`${item}`}>{item}</Badge>
-            ))}
-          </Card>
-          <h4 className="mt-4">LinkedIn Filter</h4>
-          <Card className="p-4">
-            <p>{object?.jobData?.linkedInFilter}</p>
-          </Card>
+          <p className="text-muted-foreground text-sm">
+            The fields are automatically populated by the AI and are editable.
+            Change the tags to generate the required filter for LinkedIN.
+          </p>
+          <JobOutput jobData={object as JobSchema} />
         </div>
       )}
+    </div>
+  );
+}
+
+function JobOutput({ jobData }: { jobData: JobSchema }) {
+  const form = useForm<z.infer<typeof jobSchema>>({
+    resolver: zodResolver(jobSchema),
+  });
+  useEffect(() => {
+    if (jobData) {
+      form.reset(jobData);
+    }
+  }, [jobData, form]);
+  function onSubmit(values: z.infer<typeof jobSchema>) {
+    // Handle form submission logic here
+    console.log('Form submitted with values:', values);
+  }
+  const generateLinkedInFilter = (data: JobSchema) => {
+    if (!data || !data.titles || !data.mustHaves || !data.shouldHaves) {
+      return '';
+    }
+    const titles = data.titles?.map((t) => `"${t}"`).join(' OR ');
+    const mustHaves = data.mustHaves.map((item) => `"${item}"`).join(' AND ');
+    const shouldHaves = data.shouldHaves
+      .map((item) => `"${item}"`)
+      .join(' OR ');
+    return `(${titles}) AND (${mustHaves}) AND (${shouldHaves})`;
+  };
+
+  const formValues = form.watch();
+  const linkedInFilter = useMemo(() => {
+    return generateLinkedInFilter(formValues);
+  }, [formValues]); // Memoize the generated filter string
+
+  return (
+    <div className="m-4 max-w-lg">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <FormField
+            control={form.control}
+            name="titles"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Alternate Titles</FormLabel>
+                <FormControl>
+                  <Combobox
+                    multiple
+                    allowCreate
+                    options={jobData?.titles}
+                    placeholder="Select or create alternate titles"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="mustHaves"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Must Haves</FormLabel>
+                <FormControl>
+                  <Combobox
+                    multiple
+                    allowCreate
+                    options={jobData?.mustHaves}
+                    placeholder="Select or create must haves"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="shouldHaves"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Should Haves</FormLabel>
+                <FormControl>
+                  <Combobox
+                    multiple
+                    allowCreate
+                    options={jobData?.shouldHaves}
+                    placeholder="Select or create should haves"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </form>
+      </Form>
+      <div className="grid gap-2 my-8">
+        <div className="flex items-center gap-2 text-sm leading-none font-medium select-none">
+          LinkedIn Filter
+        </div>
+        <Card className="p-4 bg-muted-50 text-sm font-mono font-medium relative">
+          {linkedInFilter}
+          <CopyButton
+            value={linkedInFilter}
+            className="absolute right-2 bottom-2"
+            variant="outline"
+          />
+        </Card>
+      </div>
+      <Link
+        href={`https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(
+          linkedInFilter,
+        )}`}
+        target="_blank"
+      >
+        <Button>Open in LinkedIn</Button>
+      </Link>
     </div>
   );
 }
