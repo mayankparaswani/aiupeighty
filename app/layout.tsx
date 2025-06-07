@@ -7,7 +7,7 @@ import './globals.css';
 import { SessionProvider } from 'next-auth/react';
 
 export const metadata: Metadata = {
-  title: "UP/Eighty AI Chatbot",
+  title: 'up/eighty AI',
   description: "Because I'm too lazy to do it myself",
 };
 
