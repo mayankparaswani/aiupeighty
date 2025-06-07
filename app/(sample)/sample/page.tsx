@@ -28,7 +28,7 @@ import { experimental_useObject as useObject } from '@ai-sdk/react';
 import { jobSchema } from '../api/sample/schema';
 
 export default function Page() {
-  const { object, submit, isLoading, stop } = useObject({
+  const { object, submit, isLoading } = useObject({
     api: '/api/sample',
     schema: jobSchema,
   });
@@ -57,8 +57,8 @@ export default function Page() {
                   <Input {...field} disabled={isLoading} />
                 </FormControl>
                 <FormDescription>
-                  Enter a job title eg. "Fronetend Developer with React and
-                  TypeScript Experience".
+                  Enter a job title eg. Fronetend Developer with React and
+                  TypeScript Experience.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
