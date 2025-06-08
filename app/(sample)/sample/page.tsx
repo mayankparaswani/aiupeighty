@@ -157,7 +157,7 @@ function JobOutput({ jobData }: { jobData: JobSchema }) {
   }, [formValues]); */
 
   return (
-    <div className="m-4 flex gap-8">
+    <div className="m-4 flex flex-col md:flex-row gap-8">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
