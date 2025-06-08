@@ -2,13 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-
-const formSchema = z.object({
-  jobTitle: z.string().min(5, {
-    message: 'Job title must be at least 5 characters.',
-  }),
-});
+import type { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -23,12 +17,13 @@ import {
 import { Input } from '@/components/ui/input';
 
 import { experimental_useObject as useObject } from '@ai-sdk/react';
-import { type JobSchema, jobSchema } from '../api/sample/schema';
+import { formSchema, type JobSchema, jobSchema } from '../api/sample/schema';
 import { Combobox } from '@/components/comboBox';
 import { useEffect, useMemo } from 'react';
 import { CopyButton } from '@/components/copy-button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function Page() {
   const { object, submit, isLoading } = useObject({
@@ -38,12 +33,15 @@ export default function Page() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      jobTitle: 'Fronetend Developer with React and TypeScript Experience',
+      jobTitle: 'Human Resources Assistant',
+      companyName: 'Microsoft',
+      jobDescription:
+        'This position reports to the Human Resources (HR) director and interfaces with company managers and HR staff. Microsoft is committed to an employee-orientated, high performance culture that emphasizes empowerment, quality, continuous improvement, and the recruitment and ongoing development of a superior workforce.',
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    submit(values.jobTitle);
+    submit(values);
   }
 
   return (
@@ -63,6 +61,32 @@ export default function Page() {
                   Enter a job title eg. Fronetend Developer with React and
                   TypeScript Experience.
                 </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="companyName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Company Name</FormLabel>
+                <FormControl>
+                  <Input {...field} disabled={isLoading} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="jobDescription"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Job Description</FormLabel>
+                <FormControl>
+                  <Textarea {...field} disabled={isLoading} />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -107,11 +131,12 @@ function JobOutput({ jobData }: { jobData: JobSchema }) {
       return '';
     }
     const titles = data.titles?.map((t) => `"${t}"`).join(' OR ');
-    const mustHaves = data.mustHaves.map((item) => `"${item}"`).join(' AND ');
-    const shouldHaves = data.shouldHaves
-      .map((item) => `"${item}"`)
-      .join(' OR ');
-    return `(${titles}) AND (${mustHaves}) AND (${shouldHaves})`;
+    const mustHaves = data.mustHaves.map((t) => `"${t}"`).join(' AND ');
+    const shouldHaves = data.shouldHaves.map((t) => `"${t}"`).join(' OR ');
+    let filter = titles ? `(${titles})` : '';
+    filter += mustHaves ? `${titles ? ' AND ' : ''}(${mustHaves})` : '';
+    filter += shouldHaves ? ` AND (${shouldHaves})` : '';
+    return filter;
   };
 
   const formValues = form.watch();
@@ -186,8 +211,8 @@ function JobOutput({ jobData }: { jobData: JobSchema }) {
         <div className="flex items-center gap-2 text-sm leading-none font-medium select-none">
           LinkedIn Filter
         </div>
-        <Card className="p-4 bg-muted-50 text-sm font-mono font-medium relative">
-          {linkedInFilter}
+        <Card className="bg-muted-50 text-[13px] font-mono font-medium relative">
+          <CardContent className="pr-8">{linkedInFilter}</CardContent>
           <CopyButton
             value={linkedInFilter}
             className="absolute right-2 bottom-2"
