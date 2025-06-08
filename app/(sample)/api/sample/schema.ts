@@ -25,6 +25,11 @@ export const jobSchema = z.object({
     .describe(
       'List of nice to have preferred or bonus qualities for the job title.',
     ),
+  linkedInBooleanSearch: z
+    .string()
+    .describe(
+      'A LinkedIn Boolean search string to efficiently source candidates for the job title and description.',
+    ),
 });
 
 export const pJobSchema = jobSchema

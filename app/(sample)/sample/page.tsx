@@ -21,9 +21,10 @@ import { formSchema, type JobSchema, jobSchema } from '../api/sample/schema';
 import { Combobox } from '@/components/comboBox';
 import { useEffect, useMemo } from 'react';
 import { CopyButton } from '@/components/copy-button';
-import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 import { Textarea } from '@/components/ui/textarea';
+import { ExternalLinkIcon } from 'lucide-react';
+import { Markdown } from '@/components/markdown';
 
 export default function Page() {
   const { object, submit, isLoading } = useObject({
@@ -45,9 +46,12 @@ export default function Page() {
   }
 
   return (
-    <div className="m-4 max-w-lg">
+    <div className="m-4">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-8 max-w-lg"
+        >
           <FormField
             control={form.control}
             name="jobTitle"
@@ -104,7 +108,7 @@ export default function Page() {
           <h2 className="text-lg font-semibold">Job Data</h2>
           <p className="text-muted-foreground text-sm">
             The fields are automatically populated by the AI and are editable.
-            Change the tags to generate the required filter for LinkedIN.
+            {/* Change the tags to generate the required filter for LinkedIN. */}
           </p>
           <JobOutput jobData={object as JobSchema} />
         </div>
@@ -126,7 +130,16 @@ function JobOutput({ jobData }: { jobData: JobSchema }) {
     // Handle form submission logic here
     console.log('Form submitted with values:', values);
   }
-  const generateLinkedInFilter = (data: JobSchema) => {
+  const formValues = form.watch();
+  const markdownText = useMemo(() => {
+    if (!formValues) return '';
+    const titles = formValues.titles?.map((t) => `- ${t}`).join('\n') || '';
+    const mustHaves = formValues.mustHaves?.map((t) => `- ${t}`).join('\n');
+    const shouldHaves = formValues.shouldHaves?.map((t) => `- ${t}`).join('\n');
+    return `### Job Titles\n${titles}\n\n### Must Haves\n${mustHaves}\n\n### Should Haves\n${shouldHaves}`;
+  }, [formValues]);
+
+  /*   const generateLinkedInFilter = (data: JobSchema) => {
     if (!data || !data.titles || !data.mustHaves || !data.shouldHaves) {
       return '';
     }
@@ -139,15 +152,17 @@ function JobOutput({ jobData }: { jobData: JobSchema }) {
     return filter;
   };
 
-  const formValues = form.watch();
   const linkedInFilter = useMemo(() => {
     return generateLinkedInFilter(formValues);
-  }, [formValues]); // Memoize the generated filter string
+  }, [formValues]); */
 
   return (
-    <div className="m-4 max-w-lg">
+    <div className="m-4 flex gap-8">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-8 max-w-lg"
+        >
           <FormField
             control={form.control}
             name="titles"
@@ -205,9 +220,47 @@ function JobOutput({ jobData }: { jobData: JobSchema }) {
               </FormItem>
             )}
           />
+          <FormField
+            control={form.control}
+            name="linkedInBooleanSearch"
+            render={({ field }) => (
+              <FormItem className="relative">
+                <FormLabel>LinkedIN Filter</FormLabel>
+                <FormControl>
+                  <Textarea
+                    {...field}
+                    placeholder="LinkedIn Boolean search will be generated here"
+                    className="pr-10"
+                  />
+                </FormControl>
+                <FormMessage />
+                <div className="absolute right-2 bottom-2 flex flex-col items-center gap-2">
+                  <CopyButton value={field.value} variant="outline" />
+                  <Button
+                    size="icon"
+                    className={'relative z-10 h-6 w-6'}
+                    asChild
+                  >
+                    <Link
+                      href={`https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(
+                        field.value,
+                      )}`}
+                      target="_blank"
+                    >
+                      <span className="sr-only">Open in LinkedIn</span>
+                      <ExternalLinkIcon />
+                    </Link>
+                  </Button>
+                </div>
+              </FormItem>
+            )}
+          />
         </form>
       </Form>
-      <div className="grid gap-2 my-8">
+      <div className="w-full bg-muted p-4 border rounded-lg">
+        <Markdown>{markdownText}</Markdown>
+      </div>
+      {/* <div className="grid gap-2 my-8">
         <div className="flex items-center gap-2 text-sm leading-none font-medium select-none">
           LinkedIn Filter
         </div>
@@ -227,7 +280,7 @@ function JobOutput({ jobData }: { jobData: JobSchema }) {
         target="_blank"
       >
         <Button>Open in LinkedIn</Button>
-      </Link>
+      </Link> */}
     </div>
   );
 }

@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   }
   const { jobTitle, companyName, jobDescription } = context.data;
   console.log({ context });
-  const prompt = `Generate components to help searching on LinkedIn for the role of ${jobTitle} at ${companyName} with the following job description: ${jobDescription}. The components should include a list of alternate titles for the job, a list of non-negotiable must-have requirements, and a list of nice-to-have preferred or bonus qualities for the job title.`;
+  const prompt = `Generate components for the role of ${jobTitle} at ${companyName} with the following job description: ${jobDescription}. The components should include a list of alternate titles for the job, a list of non-negotiable must-have requirements, a list of nice-to-have preferred or bonus qualities for the job title and a LinkedIn Boolean search string to efficiently source candidates for the job title and description. The boolean search string should be optimized for LinkedIn and include relevant minimal keywords that would help in finding suitable candidates. The response should be structured according to the provided schema.`;
   const result = await generateObject({
     model: google('gemini-1.5-flash'),
     schema: jobSchema,
